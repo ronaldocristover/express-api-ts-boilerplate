@@ -1,0 +1,67 @@
+version: '3.8'
+
+services:
+  # Development Application
+  app-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+      target: development
+    container_name: boiler-express-dev
+    ports:
+      - "${PORT:-3000}:3000"
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=mysql://root:password@db-dev:3306/boiler_express_dev
+      - JWT_SECRET=${JWT_SECRET:-dev-secret-key}
+      - REDIS_HOST=redis-dev
+      - REDIS_PORT=6379
+      - LOG_LEVEL=debug
+    depends_on:
+      - db-dev
+      - redis-dev
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - ./logs:/app/logs
+    restart: unless-stopped
+    networks:
+      - dev-network
+
+  # Development Database
+  db-dev:
+    image: mysql:8.0
+    container_name: boiler-express-db-dev
+    environment:
+      - MYSQL_ROOT_PASSWORD=password
+      - MYSQL_DATABASE=boiler_express_dev
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=password
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_dev_data:/var/lib/mysql
+    restart: unless-stopped
+    networks:
+      - dev-network
+    command: --default-authentication-plugin=mysql_native_password
+
+  # Development Redis
+  redis-dev:
+    image: redis:7-alpine
+    container_name: boiler-express-redis-dev
+    ports:
+      - "6380:6379"
+    volumes:
+      - redis_dev_data:/data
+    restart: unless-stopped
+    networks:
+      - dev-network
+
+volumes:
+  mysql_dev_data:
+  redis_dev_data:
+
+networks:
+  dev-network:
+    driver: bridge

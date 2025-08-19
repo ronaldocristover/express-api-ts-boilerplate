@@ -33,17 +33,16 @@ export const validateZod = (schema: ZodSchema) => {
               ? undefined
               : err.path.reduce((obj: any, key) => obj?.[key], req as any),
         }));
-        console.log('errorMessages', errorMessages);
-        // const validationError = createError('Validation failed', 400);
-        // (validationError as any).details = errorMessages;
+        const validationError = createError('Validation failed', 400);
+        (validationError as any).details = errorMessages;
 
-        return res.status(400).json({
-          success: false,
-          error: errorMessages,
-          message: 'Validation Failed',
-        });
+        // return res.json(400).json({
+        //   success: false,
+        //   error: errorMessages,
+        //   message: 'Validation Failed',
+        // });
 
-        // throw validationError;
+        throw validationError;
       }
 
       next(error);

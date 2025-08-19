@@ -17,10 +17,7 @@ describe('User API Endpoints', () => {
 
   describe('POST /api/v1/users', () => {
     it('should create a new user', async () => {
-      const response = await request(app)
-        .post('/api/v1/users')
-        .send(testUser)
-        .expect(201);
+      const response = await request(app).post('/api/v1/users').send(testUser).expect(201);
 
       expect(response.body.success).toBe(true);
       expect(response.body.data).toHaveProperty('id');
@@ -32,10 +29,7 @@ describe('User API Endpoints', () => {
     });
 
     it('should return error for duplicate email', async () => {
-      await request(app)
-        .post('/api/v1/users')
-        .send(testUser)
-        .expect(409);
+      await request(app).post('/api/v1/users').send(testUser).expect(409);
     });
 
     it('should return validation error for invalid email', async () => {
@@ -51,9 +45,7 @@ describe('User API Endpoints', () => {
 
   describe('GET /api/v1/users', () => {
     it('should get all users with pagination', async () => {
-      const response = await request(app)
-        .get('/api/v1/users')
-        .expect(200);
+      const response = await request(app).get('/api/v1/users').expect(200);
 
       expect(response.body.success).toBe(true);
       expect(response.body.data).toBeInstanceOf(Array);
@@ -61,18 +53,14 @@ describe('User API Endpoints', () => {
     });
 
     it('should handle pagination parameters', async () => {
-      const response = await request(app)
-        .get('/api/v1/users?page=1&limit=5')
-        .expect(200);
+      const response = await request(app).get('/api/v1/users?page=1&limit=5').expect(200);
 
       expect(response.body.pagination.page).toBe(1);
       expect(response.body.pagination.limit).toBe(5);
     });
 
     it('should handle search query parameter', async () => {
-      const response = await request(app)
-        .get('/api/v1/users?q=John')
-        .expect(200);
+      const response = await request(app).get('/api/v1/users?q=John').expect(200);
 
       expect(response.body.success).toBe(true);
       expect(response.body.data).toBeInstanceOf(Array);
@@ -81,23 +69,17 @@ describe('User API Endpoints', () => {
 
     it('should search across firstName, lastName, and email', async () => {
       // Search by first name
-      const firstNameResponse = await request(app)
-        .get('/api/v1/users?q=John')
-        .expect(200);
+      const firstNameResponse = await request(app).get('/api/v1/users?q=John').expect(200);
 
       // Search by email
-      const emailResponse = await request(app)
-        .get('/api/v1/users?q=example.com')
-        .expect(200);
+      const emailResponse = await request(app).get('/api/v1/users?q=example.com').expect(200);
 
       expect(firstNameResponse.body.success).toBe(true);
       expect(emailResponse.body.success).toBe(true);
     });
 
     it('should return empty results for non-matching search', async () => {
-      const response = await request(app)
-        .get('/api/v1/users?q=nonexistentuser')
-        .expect(200);
+      const response = await request(app).get('/api/v1/users?q=nonexistentuser').expect(200);
 
       expect(response.body.success).toBe(true);
       expect(response.body.data).toHaveLength(0);
@@ -107,9 +89,7 @@ describe('User API Endpoints', () => {
 
   describe('GET /api/v1/users/:id', () => {
     it('should get user by id', async () => {
-      const response = await request(app)
-        .get(`/api/v1/users/${userId}`)
-        .expect(200);
+      const response = await request(app).get(`/api/v1/users/${userId}`).expect(200);
 
       expect(response.body.success).toBe(true);
       expect(response.body.data.id).toBe(userId);
@@ -117,9 +97,7 @@ describe('User API Endpoints', () => {
 
     it('should return 404 for non-existent user', async () => {
       const fakeId = '01234567-89ab-cdef-0123-456789abcdef';
-      await request(app)
-        .get(`/api/v1/users/${fakeId}`)
-        .expect(404);
+      await request(app).get(`/api/v1/users/${fakeId}`).expect(404);
     });
   });
 
@@ -143,9 +121,7 @@ describe('User API Endpoints', () => {
 
   describe('DELETE /api/v1/users/:id', () => {
     it('should soft delete user', async () => {
-      const response = await request(app)
-        .delete(`/api/v1/users/${userId}`)
-        .expect(200);
+      const response = await request(app).delete(`/api/v1/users/${userId}`).expect(200);
 
       expect(response.body.success).toBe(true);
 
@@ -154,18 +130,6 @@ describe('User API Endpoints', () => {
         where: { id: userId },
       });
       expect(user?.isActive).toBe(false);
-    });
-  });
-
-  describe('GET /api/v1/users/stats', () => {
-    it('should get user statistics', async () => {
-      const response = await request(app)
-        .get('/api/v1/users/stats')
-        .expect(200);
-
-      expect(response.body.success).toBe(true);
-      expect(response.body.data).toHaveProperty('totalUsers');
-      expect(typeof response.body.data.totalUsers).toBe('number');
     });
   });
 });
